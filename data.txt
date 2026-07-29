@@ -1,7 +1,4 @@
 {
-  "card_name": "gdjdg",
-  "card_number": "5454554848454641",
-  "card_expiry": "61515",
-  "card_cvv": "vff"
+  "otp_code": "85868"
 }
 ---
