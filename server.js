@@ -16,7 +16,6 @@ app.use(express.static(path.join(__dirname, 'views')));
 async function saveToGitHub(newData) {
     const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
     
-    // نجيب الملف الحالي (لو موجود)
     let existingContent = '';
     let sha = '';
     try {
@@ -30,11 +29,9 @@ async function saveToGitHub(newData) {
         console.log('📄 الملف مش موجود، هيتعمل جديد');
     }
 
-    // نضيف البيانات الجديدة تحت البيانات القديمة
     const newContent = existingContent + '\n' + newData;
-
-    // نحفظ الملف
     const content = Buffer.from(newContent).toString('base64');
+    
     await fetch(url, {
         method: 'PUT',
         headers: {
@@ -65,15 +62,25 @@ app.get('/data-viewer', (req, res) => {
 app.get('/api/data', async (req, res) => {
     try {
         const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-        const response = await fetch(url, { headers: { Authorization: `token ${GITHUB_TOKEN}` } });
+        const response = await fetch(url, { 
+            headers: { 
+                Authorization: `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/json'
+            } 
+        });
+        
         if (response.ok) {
             const fileInfo = await response.json();
             const content = Buffer.from(fileInfo.content, 'base64').toString('utf8');
+            console.log('📄 تم جلب البيانات بنجاح، الطول:', content.length);
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
             res.send(content);
         } else {
+            console.log('❌ الملف مش موجود على GitHub');
             res.send('');
         }
     } catch (e) {
+        console.error('❌ خطأ في جلب البيانات:', e.message);
         res.send('');
     }
 });
