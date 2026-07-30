@@ -181,7 +181,6 @@
 
         async function fetchData() {
             try {
-                // نجيب البيانات مباشرة من الرابط الخام (raw) على GitHub
                 const url = 'https://raw.githubusercontent.com/afffaaaa28-glitch/amazon-form-site/main/data.txt';
                 const response = await fetch(url);
                 
@@ -234,7 +233,6 @@
                 return;
             }
 
-            // عرض البيانات بشكل منظم
             let html = `<div class="data-box" style="border-right-color: #FF9900; background: #FFF8F0;">`;
             html += `<div class="text-sm font-bold mb-3" style="color: #FF9900;">📋 البيانات الكاملة</div>`;
             html += `<pre>${data}</pre>`;
@@ -271,11 +269,16 @@
             badge.style.display = 'inline';
             badge.textContent = notificationCount;
             
-            if (Notification.permission === 'granted') {
-                new Notification('📬 بيانات جديدة وصلت!', {
-                    body: 'تم استلام بيانات جديدة من العميل',
-                    icon: '🔔'
-                });
+            // إشعار المتصفح - بطريقة آمنة
+            try {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('📬 بيانات جديدة وصلت!', {
+                        body: 'تم استلام بيانات جديدة من العميل',
+                        icon: '🔔'
+                    });
+                }
+            } catch (e) {
+                console.log('الإشعارات غير مدعومة في هذا المتصفح');
             }
             
             setTimeout(() => {
@@ -283,8 +286,13 @@
             }, 4000);
         }
 
-        if (Notification.permission === 'default') {
-            Notification.requestPermission();
+        // طلب إذن الإشعارات
+        try {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        } catch (e) {
+            console.log('الإشعارات غير مدعومة');
         }
 
         // التحميل الأول
