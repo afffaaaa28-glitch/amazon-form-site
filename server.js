@@ -58,20 +58,15 @@ app.get('/data-viewer', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'data-viewer.html'));
 });
 
-// ========== API لجلب البيانات ==========
+// ========== API لجلب البيانات (باستخدام الرابط الخام) ==========
 app.get('/api/data', async (req, res) => {
     try {
-        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-        const response = await fetch(url, { 
-            headers: { 
-                Authorization: `token ${GITHUB_TOKEN}`,
-                'Accept': 'application/json'
-            } 
-        });
+        // استخدام الرابط الخام (raw) من GitHub - مش محتاج توكن للقراءة
+        const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${FILE_PATH}`;
+        const response = await fetch(url);
         
         if (response.ok) {
-            const fileInfo = await response.json();
-            const content = Buffer.from(fileInfo.content, 'base64').toString('utf8');
+            const content = await response.text();
             console.log('📄 تم جلب البيانات بنجاح، الطول:', content.length);
             res.setHeader('Content-Type', 'text/plain; charset=utf-8');
             res.send(content);
