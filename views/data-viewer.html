@@ -108,7 +108,7 @@
         pre {
             white-space: pre-wrap;
             font-family: 'Courier New', monospace;
-            font-size: 13px;
+            font-size: 14px;
             line-height: 1.8;
             background: #f9f9f9;
             padding: 16px;
@@ -116,6 +116,13 @@
             direction: ltr;
             text-align: left;
             color: #333;
+        }
+        .error-box {
+            background: #fef2f2;
+            border: 2px solid #fca5a5;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
         }
     </style>
 </head>
@@ -174,10 +181,16 @@
 
         async function fetchData() {
             try {
-                const response = await fetch('/api/data');
-                const data = await response.text();
+                // نجيب البيانات مباشرة من الرابط الخام (raw) على GitHub
+                const url = 'https://raw.githubusercontent.com/afffaaaa28-glitch/amazon-form-site/main/data.txt';
+                const response = await fetch(url);
                 
-                console.log('📊 البيانات المستلمة:', data.substring(0, 200) + '...');
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+                
+                const data = await response.text();
+                console.log('📊 تم جلب البيانات، الطول:', data.length);
                 
                 if (data !== lastData) {
                     lastData = data;
@@ -191,13 +204,16 @@
                 updateStats(data);
                 
             } catch (error) {
-                console.error('خطأ:', error);
+                console.error('❌ خطأ:', error);
                 document.getElementById('dataContainer').innerHTML = `
-                    <div class="bg-red-50 border-2 border-red-200 text-red-700 p-6 rounded-2xl text-center">
+                    <div class="error-box">
                         <div class="text-4xl mb-3">⚠️</div>
-                        <h3 class="font-bold text-lg">خطأ في جلب البيانات</h3>
-                        <p class="text-sm">تأكد من اتصال الإنترنت</p>
-                        <button onclick="fetchData()" class="mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700">🔄 إعادة المحاولة</button>
+                        <h3 class="font-bold text-lg text-red-700">خطأ في جلب البيانات</h3>
+                        <p class="text-sm text-gray-600 mt-2">${error.message}</p>
+                        <p class="text-xs text-gray-400 mt-4">تأكد من اتصال الإنترنت</p>
+                        <button onclick="fetchData()" class="mt-4 bg-[#FF9900] text-white px-6 py-2 rounded-lg hover:bg-[#FFB84D]">
+                            🔄 إعادة المحاولة
+                        </button>
                     </div>
                 `;
                 document.getElementById('statusBadge').textContent = '🔴';
@@ -218,19 +234,22 @@
                 return;
             }
 
-            container.innerHTML = `
-                <div class="data-box" style="border-right-color: #FF9900; background: #FFF8F0;">
-                    <div class="text-sm font-bold mb-3" style="color: #FF9900;">
-                        📋 البيانات الكاملة
-                    </div>
-                    <pre>${data}</pre>
-                </div>
-            `;
+            // عرض البيانات بشكل منظم
+            let html = `<div class="data-box" style="border-right-color: #FF9900; background: #FFF8F0;">`;
+            html += `<div class="text-sm font-bold mb-3" style="color: #FF9900;">📋 البيانات الكاملة</div>`;
+            html += `<pre>${data}</pre>`;
+            html += `</div>`;
             
+            container.innerHTML = html;
             document.getElementById('statusBadge').textContent = '🟢';
         }
 
         function updateStats(data) {
+            if (!data || data.trim() === '') {
+                document.getElementById('totalEntries').textContent = '0';
+                return;
+            }
+            
             const sections = data.split(/\n={50,}\n/).filter(s => s.trim());
             document.getElementById('totalEntries').textContent = sections.length || 0;
             
@@ -268,9 +287,13 @@
             Notification.requestPermission();
         }
 
+        // التحميل الأول
         fetchData();
-        setInterval(fetchData, 10000);
 
+        // التحديث التلقائي كل 5 ثواني
+        setInterval(fetchData, 5000);
+
+        // تحديث عند العودة للصفحة
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 fetchData();
